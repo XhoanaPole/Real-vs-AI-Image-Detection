@@ -1,0 +1,62 @@
+{
+  "cnn_spatial": {
+    "accuracy": 0.8426842684268426,
+    "confusion_matrix": [
+      [
+        1141,
+        224
+      ],
+      [
+        205,
+        1157
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n        Real       0.85      0.84      0.84      1365\n        Fake       0.84      0.85      0.84      1362\n\n    accuracy                           0.84      2727\n   macro avg       0.84      0.84      0.84      2727\nweighted avg       0.84      0.84      0.84      2727\n",
+    "roc_auc": 0.9185113467051791
+  },
+  "cnn_fft": {
+    "accuracy": 0.7799779977997799,
+    "confusion_matrix": [
+      [
+        1001,
+        364
+      ],
+      [
+        236,
+        1126
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n        Real       0.81      0.73      0.77      1365\n        Fake       0.76      0.83      0.79      1362\n\n    accuracy                           0.78      2727\n   macro avg       0.78      0.78      0.78      2727\nweighted avg       0.78      0.78      0.78      2727\n",
+    "roc_auc": 0.8625088078832572
+  },
+  "svm_fft": {
+    "accuracy": 0.7315731573157316,
+    "confusion_matrix": [
+      [
+        1086,
+        279
+      ],
+      [
+        453,
+        909
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n        Real       0.71      0.80      0.75      1365\n        Fake       0.77      0.67      0.71      1362\n\n    accuracy                           0.73      2727\n   macro avg       0.74      0.73      0.73      2727\nweighted avg       0.74      0.73      0.73      2727\n",
+    "roc_auc": 0.8012815133960508
+  },
+  "resnet18": {
+    "accuracy": 0.9468280161349468,
+    "confusion_matrix": [
+      [
+        1284,
+        81
+      ],
+      [
+        64,
+        1298
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n        Real       0.95      0.94      0.95      1365\n        Fake       0.94      0.95      0.95      1362\n\n    accuracy                           0.95      2727\n   macro avg       0.95      0.95      0.95      2727\nweighted avg       0.95      0.95      0.95      2727\n",
+    "roc_auc": 0.9866200857390284
+  }
+}

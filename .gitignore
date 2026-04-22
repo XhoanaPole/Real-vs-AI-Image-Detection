@@ -1,0 +1,49 @@
+# =============================================================
+# DeepGuard — .gitignore
+# =============================================================
+
+# ── Raw master dataset (gigabytes!) ──────────────────────────
+DeepGuardDB_v1/
+
+# ── Processed dataset splits ─────────────────────────────────
+computer_vision_project/dataset/
+
+# ── Trained model checkpoints ────────────────────────────────
+computer_vision_project/checkpoints/
+computer_vision_project/checkpoints_backup_before_gemini/
+
+# ── Virtual environment ───────────────────────────────────────
+venv_gpu/
+venv/
+.venv/
+env/
+
+# ── Training & evaluation logs ────────────────────────────────
+computer_vision_project/output.txt
+computer_vision_project/output1.txt
+computer_vision_project/evaluate_output.txt
+computer_vision_project/logs/
+
+# ── Python cache ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# ── IDE / Tool configs ────────────────────────────────────────
+.claude/
+.vscode/
+.idea/
+
+# ── Jupyter checkpoints ───────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── OS junk ───────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── API keys / secrets ────────────────────────────────────────
+*.env
+.env
+secrets.py

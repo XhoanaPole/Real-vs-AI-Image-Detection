@@ -1,0 +1,50 @@
+# =============================================================
+# DeepGuard — .gitignore
+# =============================================================
+
+# ── Dataset (too large for GitHub, share via Google Drive) ───
+dataset/
+DeepGuardDB_v1/
+
+# ── Trained model checkpoints (large .pth / .pkl files) ──────
+checkpoints/
+checkpoints_backup_before_gemini/
+
+# ── Training & evaluation logs ────────────────────────────────
+output.txt
+output1.txt
+evaluate_output.txt
+logs/
+
+# ── Python cache ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ── Virtual environments ──────────────────────────────────────
+venv/
+venv_gpu/
+.venv/
+env/
+
+# ── IDE / Editor configs ──────────────────────────────────────
+.claude/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Jupyter Notebook checkpoints ─────────────────────────────
+.ipynb_checkpoints/
+
+# ── OS junk ───────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Gemini API keys (safety net) ─────────────────────────────
+*.env
+.env
+secrets.py
