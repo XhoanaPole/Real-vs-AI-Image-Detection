@@ -1,7 +1,21 @@
-# AI-Generated Image Detection
-### Spatial CNN vs Frequency-Domain CNN & SVM
+# Real vs AI Image Detection
+### A Dual-Domain Approach: Spatial CNNs, FFT Analysis, and Transfer Learning
 
-A complete PyTorch project that compares **spatial** and **frequency-domain** approaches for detecting AI-generated images.
+A complete PyTorch and Streamlit project that detects AI-generated images by analyzing both standard visual features (spatial domain) and invisible mathematical artifacts (frequency domain).
+
+---
+
+## Dataset Overview
+
+The models were trained and validated on a curated dataset containing images from five state-of-the-art diffusion models paired with real photographs:
+1. **Stable Diffusion**
+2. **DALL-E 3**
+3. **GLIDE**
+4. **Google Imagen**
+5. **Google Gemini (Imagen 3)** — *used as a zero-shot/generalization benchmark*
+
+**Dataset Access:**
+The `Gemini_dataset` sample (60 images: 30 real, 30 fake) is available in this repository under `Gemini_dataset_sample/`. The full 13,000+ image dataset is hosted externally.
 
 ---
 
@@ -12,248 +26,94 @@ computer_vision_project/
 │
 ├── dataset.py            # PyTorch Dataset + DataLoader factory
 ├── preprocess.py         # Spatial & FFT transforms
-├── fft_features.py       # FFT feature extraction + visualisation
-├── model_cnn.py          # SimpleCNN (shared by Model A and B-CNN)
-├── model_svm.py          # RBF SVM wrapper (Model B-SVM)
-├── train.py              # Training loops (CNN + SVM)
-├── evaluate.py           # Metrics, confusion matrix, ROC, comparison
-├── visualize.py          # FFT plots, training curves, prediction grid
-├── config.py             # Central hyperparameters (edit here)
-├── main.py               # Pipeline orchestrator
-│
-├── prepare_dataset.py    # Dataset sampling + preprocessing
-├── verify_dataset.py     # Dataset integrity check
-├── explore_dataset.py    # Inspect GenImage before sampling
-├── merge_custom.py       # Add custom real/fake images
-│
-├── requirements.txt           # Full training requirements
-├── requirements_dataset.txt   # Lightweight dataset-prep requirements
-├── README.md
-└── README_dataset.md          # Dataset preparation guide
+├── fft_features.py       # FFT feature extraction + mathematical analysis
+├── model_cnn.py          # SimpleCNN & ResNet-18 backbone architecture
+├── model_svm.py          # RBF SVM baseline model
+├── train.py              # Training loops for all 4 models
+├── evaluate.py           # Metrics calculation (Accuracy, ROC-AUC, Recall)
+├── visualize.py          # FFT plots, training curves, Grad-CAM maps
+├── config.py             # Central hyperparameters (epochs, batch size, lr)
+├── generalization_eval.py# Cross-generator accuracy breakdown
+└── app.py                # Interactive Streamlit Web Interface
 ```
 
 ---
 
-## Pipelines
+## The Four Investigators (Models)
 
-| Pipeline | Input | Model | Description |
+| Pipeline | Approach | Input | Model Architecture |
 |---|---|---|---|
-| **Model A** | Raw RGB (3×256×256) | SimpleCNN | Baseline spatial CNN |
-| **Model B — CNN** | FFT magnitude (1×256×256) | SimpleCNN | CNN on log-magnitude spectrum |
-| **Model B — SVM** | 18 FFT features | RBF SVM | Hand-crafted frequency features |
-
-### FFT Features (Model B — SVM)
-| Feature | Size | Description |
-|---|---|---|
-| `mean_energy` | 1 | Average log-magnitude across spectrum |
-| `high_freq_ratio` | 1 | Energy in outer 25% radial ring / total |
-| `radial_distribution` | 16 | Normalised radial energy histogram |
+| **Model A** | 👁️ Visual (Spatial) | Raw RGB (3×256×256) | Custom lightweight CNN |
+| **Model B** | 📡 Frequency (FFT) | Log-magnitude spectrum (1×256×256) | Custom lightweight CNN |
+| **Model C** | 🎯 Classical baseline| Hand-crafted FFT features (18) | RBF SVM |
+| **Model D** | 🧬 Transfer Learning | Raw RGB (3×256×256) | Pre-trained ResNet-18 |
 
 ---
 
-## Quick Start
+## Test Set Results (2,727 Unseen Images)
 
-### 1. Activate your Environment
+| Model | Accuracy | Recall (Fake) | ROC-AUC |
+|---|---|---|---|
+| **ResNet-18 (Model D)** | **94.7%** | **95.0%** | **0.987** |
+| CNN Spatial (Model A) | 84.3% | 85.0% | 0.919 |
+| CNN FFT (Model B) | 78.0% | 83.0% | 0.863 |
+| SVM FFT (Model C) | 73.2% | 67.0% | 0.801 |
 
-You already have PyTorch installed in your Anaconda environment named `xhoan1`. All required project dependencies have been installed there automatically!
-
-Open your **Anaconda Prompt** and run:
-
-```powershell
-conda activate xhoan1
-cd C:\Users\xhoan\Downloads\computer_vision_project
-```
-
-### 2. Prepare Dataset
-
-> See `README_dataset.md` for full dataset preparation guide.
-
-```powershell
-# Step 1: Explore your GenImage download
-python explore_dataset.py --genimage_root D:\GenImage
-
-# Step 2: Sample and preprocess 1000 images per class
-python prepare_dataset.py `
-    --genimage_root D:\GenImage `
-    --output_root   dataset `
-    --generators    Midjourney Stable_Diffusion_V1_4 `
-    --num_samples   1000
-
-# Step 3: Verify the prepared dataset
-python verify_dataset.py --dataset_root dataset
-```
-
-**Expected output structure:**
-```
-dataset/
-├── train/
-│   ├── real/   (800 images)
-│   └── fake/   (800 images)
-└── val/
-    ├── real/   (200 images)
-    └── fake/   (200 images)
-```
-
-### 3. Run the Full Pipeline
-
-```powershell
-# Train all models → Evaluate → Visualize
-python main.py --mode all
-```
+> *Note: These models were evaluated against modern diffusion models, which are significantly harder to detect than older GANs.*
 
 ---
 
-## Detailed Commands
+## Quick Start: Interactive Dashboard
 
-### Train individual models
-
-```powershell
-# Model A — Spatial CNN
-python train.py --model cnn_spatial --epochs 20 --batch_size 32
-
-# Model B — FFT CNN
-python train.py --model cnn_fft --epochs 20 --batch_size 32
-
-# Model B — FFT SVM (no epochs needed)
-python train.py --model svm_fft
-```
-
-### Evaluate
+The easiest way to experience the detection system is through the live web interface.
 
 ```powershell
-python evaluate.py --data_root dataset --batch_size 32
+# 1. Activate your conda environment
+conda activate venv_gpu
+
+# 2. Run the Streamlit app
+streamlit run app.py
+```
+This will open a browser window at `http://localhost:8501/` where you can upload any image and see the spatial, frequency, and ResNet-18 predictions in real time.
+
+---
+
+## Detailed Commands for Researchers
+
+### 1. Training the Models
+All hyperparameters are managed in `config.py`.
+
+```powershell
+# Train the custom Spatial CNN
+python train.py --model cnn_spatial
+
+# Train the Frequency (FFT) CNN
+python train.py --model cnn_fft
+
+# Train the ResNet-18 Transfer Learning model
+python train.py --model resnet18
 ```
 
+### 2. Evaluation & Metrics
+```powershell
+python evaluate.py
+```
 Produces:
-- `results/cm_cnn_spatial.png` — confusion matrix
-- `results/cm_cnn_fft.png`
-- `results/cm_svm_fft.png`
-- `results/roc_curves.png` — overlaid ROC curves
-- `results/accuracy_comparison.png` — bar chart
-- `results/evaluation_summary.json` — full metrics
+- `results/cm_*.png` — Confusion matrices
+- `results/roc_curves.png` — Overlaid ROC curves comparing all models
 
-### Visualize
-
+### 3. Visualizations
 ```powershell
-python visualize.py --data_root dataset --n_samples 3
+python visualize.py
 ```
-
 Produces:
-- `results/visualizations/fft_comparison_*.png`
-- `results/visualizations/training_curves_*.png`
-- `results/visualizations/val_accuracy_all_models.png`
-- `results/visualizations/predictions_cnn_spatial.png`
+- Visual comparisons of real vs AI FFT spectra.
+- Training loss and accuracy curves.
 
 ---
 
-## Configuration
+## Why Frequency Analysis (FFT)?
 
-All key hyperparameters are in **`config.py`**. Edit there — no need to touch other files:
+AI image generators (like Diffusion Models) construct images using mathematical grids and iterative denoising steps. While the final image looks perfect to the human eye, these underlying mathematical processes leave behind invisible recurring high-frequency artifacts (such as grid patterns and artificial symmetry). 
 
-```python
-CFG.epochs      = 20       # training epochs
-CFG.batch_size  = 32       # images per batch (RTX 4050 6GB: safe at 32)
-CFG.lr          = 1e-4     # learning rate (AdamW + CosineAnnealingLR)
-CFG.image_size  = 256      # spatial resolution
-CFG.radial_bins = 16       # FFT radial histogram bins
-CFG.num_workers = 4        # DataLoader workers (set 0 if Windows errors)
-```
-
----
-
-## CNN Architecture
-
-```
-Input  (C × 256 × 256)          C = 3 (spatial) or 1 (FFT)
-  ↓
-ConvBlock 1:  C  → 32    Conv(3×3) → BN → ReLU → MaxPool    → 128×128
-ConvBlock 2:  32 → 64    Conv(3×3) → BN → ReLU → MaxPool    →  64×64
-ConvBlock 3:  64 → 128   Conv(3×3) → BN → ReLU → MaxPool    →  32×32
-ConvBlock 4:  128 → 256  Conv(3×3) → BN → ReLU → MaxPool    →  16×16
-  ↓
-Global Average Pooling  →  (256,)
-  ↓
-FC(256 → 128) → ReLU → Dropout(0.5)
-  ↓
-FC(128 → 2)   — logits
-```
-
-**~1.5M parameters** — fits comfortably in 6 GB VRAM at `batch_size=32`.
-
----
-
-## Expected Results
-
-These are typical ranges on a balanced 1000-sample-per-class subset:
-
-| Model | Val Accuracy | ROC AUC |
-|---|---|---|
-| Model A — Spatial CNN | 75–90% | 0.83–0.95 |
-| Model B — FFT CNN | 70–85% | 0.78–0.92 |
-| Model B — FFT SVM | 60–75% | 0.65–0.82 |
-
-> Results vary significantly by generator. Midjourney images are harder to detect than BigGAN.
-
----
-
-## Output Files
-
-```
-checkpoints/
-├── cnn_spatial_best.pth      # best CNN spatial checkpoint
-├── cnn_fft_best.pth          # best CNN FFT checkpoint
-└── svm_fft_best.pkl          # fitted SVM pipeline
-
-logs/
-├── cnn_spatial_metrics.csv
-└── cnn_fft_metrics.csv
-
-results/
-├── accuracy_comparison.png
-├── roc_curves.png
-├── cm_cnn_spatial.png
-├── cm_cnn_fft.png
-├── cm_svm_fft.png
-├── evaluation_summary.json
-└── visualizations/
-    ├── fft_comparison_1.png
-    ├── fft_comparison_2.png
-    ├── fft_comparison_3.png
-    ├── training_curves_cnn_spatial.png
-    ├── training_curves_cnn_fft.png
-    ├── val_accuracy_all_models.png
-    └── predictions_cnn_spatial.png
-```
-
----
-
-## Troubleshooting
-
-| Problem | Solution |
-|---|---|
-| `CUDA out of memory` | Reduce `--batch_size` to 16 |
-| `DataLoader worker error` | Add `--num_workers 0` |
-| `No images found` | Run `prepare_dataset.py` first |
-| SVM is very slow | Normal for large datasets — uses all CPU cores |
-| `ModuleNotFoundError: cv2` | `pip install opencv-python` |
-
----
-
-## Hardware
-
-Optimised for:
-
-- **GPU**: NVIDIA GeForce RTX 4050 (6 GB VRAM)
-- **CUDA**: 12.x
-- **Python**: 3.10+
-- **OS**: Windows 11
-
----
-
-## Research Goal
-
-Compare:
-- **Spatial domain (Model A)**: Can a CNN learn texture/artefact patterns from raw pixels?
-- **Frequency domain (Model B)**: Do FFT spectral signatures better reveal AI generation artefacts?
-
-Key hypothesis: AI-generated images exhibit characteristic high-frequency patterns in the FFT spectrum (grid artefacts from upsampling, spectral peaks from periodic structures) that simple spatial CNNs may miss.
+By transforming the image into the frequency domain using a Fast Fourier Transform (FFT), this system strips away the visual content to examine the raw mathematical signature of the image, exposing AI-generation patterns that spatial models might miss.
